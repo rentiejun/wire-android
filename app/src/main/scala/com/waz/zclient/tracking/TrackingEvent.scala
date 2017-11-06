@@ -25,7 +25,7 @@ import com.waz.model.ConversationData.ConversationType
 import com.waz.model.{ConversationData, Mime}
 import com.waz.service.push.{MissedPushes, ReceivedPushData}
 import com.waz.utils.returning
-import com.waz.zclient.controllers.SignInController._
+import com.waz.zclient.appentry.controllers.SignInController._
 import com.waz.zclient.tracking.ContributionEvent.Action
 import org.json.JSONObject
 import org.threeten.bp.Duration

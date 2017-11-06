@@ -19,7 +19,7 @@ package com.waz.zclient.api.scala
 
 import android.os.Handler
 import com.waz.api._
-import com.waz.zclient.controllers.global.SelectionController
+import com.waz.zclient.common.controllers.global.SelectionController
 import com.waz.zclient.core.stores.conversation.{ConversationChangeRequester, ConversationStoreObserver, IConversationStore, OnConversationLoadedListener}
 import com.waz.ZLog._
 import com.waz.ZLog.ImplicitTag._

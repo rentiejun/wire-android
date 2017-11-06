@@ -40,9 +40,9 @@ import com.waz.utils.events.{EventContext, Signal}
 import com.waz.utils.returning
 import com.waz.zclient.Intents._
 import com.waz.zclient._
+import com.waz.zclient.common.controllers.SoundController
 import com.waz.zclient.controllers.navigation.Page
 import com.waz.zclient.controllers.userpreferences.UserPreferencesController
-import com.waz.zclient.media.SoundController
 import com.waz.zclient.messages.controllers.NavigationController
 import com.waz.zclient.utils.ContextUtils._
 import com.waz.zclient.utils.RingtoneUtils

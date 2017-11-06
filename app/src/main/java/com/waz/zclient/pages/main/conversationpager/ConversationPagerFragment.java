@@ -37,7 +37,7 @@ import com.waz.zclient.controllers.navigation.NavigationController;
 import com.waz.zclient.controllers.navigation.NavigationControllerObserver;
 import com.waz.zclient.controllers.navigation.Page;
 import com.waz.zclient.controllers.navigation.PagerControllerObserver;
-import com.waz.zclient.conversation.CollectionController;
+import com.waz.zclient.collection.controllers.CollectionController;
 import com.waz.zclient.core.stores.conversation.ConversationChangeRequester;
 import com.waz.zclient.core.stores.conversation.ConversationStoreObserver;
 import com.waz.zclient.pages.BaseFragment;

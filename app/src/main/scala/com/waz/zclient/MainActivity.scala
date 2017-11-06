@@ -35,16 +35,18 @@ import com.waz.service.ZMessaging.clock
 import com.waz.threading.{CancellableFuture, Threading}
 import com.waz.utils.events.Signal
 import com.waz.utils.{RichInstant, returning}
-import com.waz.zclient.AppEntryController.{DeviceLimitStage, EnterAppStage, Unknown}
+import com.waz.zclient.appentry.controllers.AppEntryController.{DeviceLimitStage, EnterAppStage, Unknown}
 import com.waz.zclient.Intents._
+import com.waz.zclient.appentry.AppEntryActivity
+import com.waz.zclient.appentry.controllers.AppEntryController
 import com.waz.zclient.calling.CallingActivity
 import com.waz.zclient.calling.controllers.CallPermissionsController
-import com.waz.zclient.common.controllers.PermissionsController
+import com.waz.zclient.common.controllers.{PermissionsController, SharingController, UserAccountsController}
 import com.waz.zclient.controllers.accentcolor.AccentColorChangeRequester
 import com.waz.zclient.controllers.calling.CallingObserver
-import com.waz.zclient.controllers.global.{AccentColorController, SelectionController}
+import com.waz.zclient.common.controllers.global.{AccentColorController, SelectionController}
 import com.waz.zclient.controllers.navigation.{NavigationControllerObserver, Page}
-import com.waz.zclient.controllers.{SharingController, UserAccountsController}
+import com.waz.zclient.common.controllers.UserAccountsController
 import com.waz.zclient.core.stores.api.ZMessagingApiStoreObserver
 import com.waz.zclient.core.stores.connect.{ConnectStoreObserver, IConnectStore}
 import com.waz.zclient.core.stores.conversation.ConversationChangeRequester

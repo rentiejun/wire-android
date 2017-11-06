@@ -37,8 +37,8 @@ import com.waz.model.ConvId;
 import com.waz.model.UserId;
 import com.waz.zclient.BaseActivity;
 import com.waz.zclient.R;
-import com.waz.zclient.controllers.ThemeController;
-import com.waz.zclient.controllers.UserAccountsController;
+import com.waz.zclient.common.controllers.ThemeController;
+import com.waz.zclient.common.controllers.UserAccountsController;
 import com.waz.zclient.controllers.accentcolor.AccentColorObserver;
 import com.waz.zclient.core.api.scala.ModelObserver;
 import com.waz.zclient.core.stores.conversation.ConversationChangeRequester;
@@ -50,7 +50,7 @@ import com.waz.zclient.pages.main.participants.views.ParticipantOtrDeviceAdapter
 import com.waz.zclient.pages.main.participants.views.TabbedParticipantPagerAdapter;
 import com.waz.zclient.ui.views.tab.TabIndicatorLayout;
 import com.waz.zclient.utils.ViewUtils;
-import com.waz.zclient.views.ParticipantDetailsTab;
+import com.waz.zclient.conversation.ParticipantDetailsTab;
 import com.waz.zclient.views.menus.FooterMenuCallback;
 
 public class TabbedParticipantBodyFragment extends BaseFragment<TabbedParticipantBodyFragment.Container> implements

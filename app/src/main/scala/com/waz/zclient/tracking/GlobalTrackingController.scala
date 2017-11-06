@@ -30,7 +30,8 @@ import com.waz.threading.{SerialDispatchQueue, Threading}
 import com.waz.utils.{RichThreetenBPDuration, _}
 import com.waz.utils.events.{EventContext, Signal}
 import com.waz.zclient._
-import com.waz.zclient.controllers.SignInController.{InputType, SignInMethod}
+import com.waz.zclient.appentry.EntryError
+import com.waz.zclient.appentry.controllers.SignInController.{InputType, SignInMethod}
 import com.waz.zclient.tracking.AddPhotoOnRegistrationEvent.Source
 import com.waz.zclient.tracking.ContributionEvent.fromMime
 import org.json.JSONObject

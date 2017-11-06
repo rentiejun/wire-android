@@ -32,8 +32,8 @@ import com.waz.model.{AccountId, ConvId}
 import com.waz.service.ZMessaging
 import com.waz.utils.events.Signal
 import com.waz.utils.returning
-import com.waz.zclient.controllers.SharingController
-import com.waz.zclient.controllers.global.AccentColorController
+import com.waz.zclient.common.controllers.SharingController
+import com.waz.zclient.common.controllers.global.AccentColorController
 import com.waz.zclient.pages.main.popup.ViewPagerLikeLayoutManager
 import com.waz.zclient.tracking.ContributionEvent.Action
 import com.waz.zclient.tracking.GlobalTrackingController.convType

@@ -29,26 +29,26 @@ import com.waz.model.ConversationData
 import com.waz.service.{NetworkModeService, ZMessaging, ZmsLifeCycle}
 import com.waz.utils.events.{EventContext, Signal, Subscription}
 import com.waz.zclient.api.scala.ScalaStoreFactory
+import com.waz.zclient.appentry.controllers.{AppEntryController, SignInController}
 import com.waz.zclient.calling.controllers.{CallPermissionsController, CurrentCallController, GlobalCallingController}
 import com.waz.zclient.camera.controllers.{AndroidCameraFactory, GlobalCameraController}
-import com.waz.zclient.common.controllers.{PermissionActivity, PermissionsController, PermissionsWrapper}
+import com.waz.zclient.collection.controllers.CollectionController
+import com.waz.zclient.common.controllers.{SoundController, _}
 import com.waz.zclient.controllers._
 import com.waz.zclient.controllers.camera.ICameraController
 import com.waz.zclient.controllers.deviceuser.IDeviceUserController
 import com.waz.zclient.controllers.drawing.IDrawingController
 import com.waz.zclient.controllers.giphy.IGiphyController
-import com.waz.zclient.controllers.global.{AccentColorController, KeyboardController, PasswordController, SelectionController}
+import com.waz.zclient.common.controllers.global.{AccentColorController, KeyboardController, PasswordController, SelectionController}
 import com.waz.zclient.controllers.globallayout.IGlobalLayoutController
 import com.waz.zclient.controllers.location.ILocationController
 import com.waz.zclient.controllers.navigation.INavigationController
 import com.waz.zclient.controllers.singleimage.ISingleImageController
 import com.waz.zclient.controllers.userpreferences.IUserPreferencesController
-import com.waz.zclient.conversation.CollectionController
 import com.waz.zclient.conversationlist.ConversationListController
 import com.waz.zclient.core.stores.IStoreFactory
 import com.waz.zclient.core.stores.network.INetworkStore
 import com.waz.zclient.cursor.CursorController
-import com.waz.zclient.media.SoundController
 import com.waz.zclient.messages.controllers.{MessageActionsController, NavigationController}
 import com.waz.zclient.messages.{LikesController, MessageViewFactory, MessagesController, UsersController}
 import com.waz.zclient.notifications.controllers.{CallingNotificationsController, ImageNotificationsController, MessageNotificationsController}
@@ -58,7 +58,7 @@ import com.waz.zclient.pages.main.pickuser.controller.IPickUserController
 import com.waz.zclient.preferences.PreferencesController
 import com.waz.zclient.tracking.{CallingTrackingController, CrashController, GlobalTrackingController, UiTrackingController}
 import com.waz.zclient.utils.{BackStackNavigator, BackendPicker, Callback, UiStorage}
-import com.waz.zclient.views.ImageController
+import com.waz.zclient.common.views.ImageController
 
 object WireApplication {
   var APP_INSTANCE: WireApplication = _

@@ -19,7 +19,7 @@ package com.waz.zclient.api.scala
 
 import com.waz.zclient.core.stores.StoreFactory
 import android.content.Context
-import com.waz.zclient.controllers.global.SelectionController
+import com.waz.zclient.common.controllers.global.SelectionController
 import com.waz.zclient.core.api.scala._
 import com.waz.zclient.core.stores.api.ZMessagingApiStore
 

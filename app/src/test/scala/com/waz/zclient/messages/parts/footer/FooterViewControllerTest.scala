@@ -31,7 +31,7 @@ import com.waz.testutils.{MockZMessaging, TestWireContext, ViewTestActivity}
 import com.waz.utils.events.{EventContext, Signal}
 import com.waz.utils.returning
 import com.waz.zclient._
-import com.waz.zclient.controllers.global.{AccentColorController, SelectionController}
+import com.waz.zclient.common.controllers.global.{AccentColorController, SelectionController}
 import com.waz.zclient.messages.MessageView.MsgBindOptions
 import com.waz.zclient.messages.{LikesController, UsersController}
 import junit.framework.Assert.assertEquals
