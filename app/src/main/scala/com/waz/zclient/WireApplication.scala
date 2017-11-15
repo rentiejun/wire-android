@@ -60,6 +60,7 @@ import com.waz.zclient.preferences.PreferencesController
 import com.waz.zclient.tracking.{CallingTrackingController, CrashController, GlobalTrackingController, UiTrackingController}
 import com.waz.zclient.utils.{BackStackNavigator, BackendPicker, Callback, UiStorage}
 import com.waz.zclient.views.{DraftMap, ImageController}
+import net.hockeyapp.android.Constants
 
 object WireApplication {
   var APP_INSTANCE: WireApplication = _
@@ -205,6 +206,8 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
     new BackendPicker(this).withBackend(new Callback[Void]() {
       def callback(aVoid: Void) = ensureInitialized()
     })
+
+    Constants.loadFromContext(getApplicationContext)
   }
 
   def ensureInitialized() = {

@@ -28,7 +28,6 @@ import com.waz.content.GlobalPreferences
 import com.waz.service.ZMessaging
 import com.waz.threading.{CancellableFuture, Threading}
 import com.waz.zclient.pages.main.profile.preferences.views.{SwitchPreference, TextButton}
-import com.waz.zclient.tracking.GlobalTrackingController
 import com.waz.zclient.utils.ContextUtils._
 import com.waz.zclient.utils.{BackStackKey, DebugUtils}
 import com.waz.zclient.{BuildConfig, R, ViewHelper}
@@ -38,13 +37,14 @@ trait AdvancedView
 
 class AdvancedViewImpl(context: Context, attrs: AttributeSet, style: Int) extends LinearLayout(context, attrs, style) with AdvancedView with ViewHelper {
   def this(context: Context, attrs: AttributeSet) = this(context, attrs, 0)
+
   def this(context: Context) = this(context, null, 0)
 
   inflate(R.layout.preferences_advanced_layout)
 
   val analyticsSwitch = findById[SwitchPreference](R.id.preferences_analytics)
-  val submitReport    = findById[TextButton](R.id.preferences_debug_report)
-  val resetPush       = findById[TextButton](R.id.preferences_reset_push)
+  val submitReport = findById[TextButton](R.id.preferences_debug_report)
+  val resetPush = findById[TextButton](R.id.preferences_reset_push)
 
   analyticsSwitch.setPreference({
     BuildConfig.APPLICATION_ID match {
@@ -53,7 +53,7 @@ class AdvancedViewImpl(context: Context, attrs: AttributeSet, style: Int) extend
     }
   }, global = true)
 
-  submitReport.onClickEvent{ _ =>
+  submitReport.onClickEvent { _ =>
     DebugUtils.sendDebugReport(context.asInstanceOf[Activity])
   }
 
@@ -69,7 +69,10 @@ class AdvancedViewImpl(context: Context, attrs: AttributeSet, style: Int) extend
     resetPush.setAlpha(if (enabled) 1.0f else 0.5f)
   }
 
-  analyticsSwitch.pref.flatMap(_.signal).onChanged(inject[GlobalTrackingController].onOptOut)
+  analyticsSwitch.pref.flatMap(_.signal).onChanged {
+    case true =>  ZMessaging.currentGlobal.trackingService.optIn()
+    case false => ZMessaging.currentGlobal.trackingService.optOut()
+  }
 }
 
 case class AdvancedBackStackKey(args: Bundle = new Bundle()) extends BackStackKey(args) {

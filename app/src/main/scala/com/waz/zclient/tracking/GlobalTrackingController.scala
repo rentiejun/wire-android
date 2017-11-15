@@ -25,14 +25,14 @@ import com.waz.content.Preferences.PrefKey
 import com.waz.content.{GlobalPreferences, MembersStorage, UsersStorage}
 import com.waz.model.ConversationData.ConversationType
 import com.waz.model.{UserId, _}
-import com.waz.service.{AccountManager, ZMessaging, UiLifeCycle}
+import com.waz.service.tracking._
+import com.waz.service.{UiLifeCycle, ZMessaging}
 import com.waz.threading.{SerialDispatchQueue, Threading}
 import com.waz.utils.{RichThreetenBPDuration, _}
 import com.waz.utils.events.{EventContext, Signal}
 import com.waz.zclient._
 import com.waz.zclient.controllers.SignInController.{InputType, SignInMethod}
 import com.waz.zclient.tracking.AddPhotoOnRegistrationEvent.Source
-import com.waz.zclient.tracking.ContributionEvent.fromMime
 import org.json.JSONObject
 
 import scala.concurrent.Future._
@@ -64,7 +64,7 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext, eventCo
     case _ => PrefKey[Boolean]("DEVELOPER_TRACKING_ENABLED")
   }
 
-  def trackingEnabled = ZMessaging.globalModule.flatMap(_.prefs.preference(prefKey).apply())
+  private def trackingEnabled = ZMessaging.globalModule.flatMap(_.prefs.preference(prefKey).apply())
 
   inject[UiLifeCycle].uiActive.onChanged {
     case false =>
@@ -75,55 +75,16 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext, eventCo
     case _ =>
   }
 
-  private var registeredZmsInstances = Set.empty[ZMessaging]
-
-  /**
-    * WARNING: since we have to first listen to the zms signal in order to find the event streams that we care about for tracking,
-    * whenever this signal changes, we will define a new signal subscription, in the closure of which we will generate new subscriptions
-    * for all the event streams in that signal. This means that if zms changes and then changes back (switching accounts) or the signal fires
-    * twice, we'll have two listeners to each event stream, and we'll end up tagging each event twice.
-    *
-    * Therefore, we keep a set of registered zms instances, and only register the listeners once.
-    */
-  zmsOpt {
-    case Some(zms) if !registeredZmsInstances(zms) =>
-      registeredZmsInstances += zms
-      registerTrackingEventListeners(zms)
-    case _ => //already registered to this zms, do nothing.
+  // access tracking events when they become available and start processing
+  ZMessaging.globalModule.map(_.trackingService.events).foreach {
+    _ { case (zms, event) => process(event, zms) }
   }
-
-  AccountManager.OnRemovedClient.on(dispatcher) { _ => onLoggedOut(LoggedOutEvent.RemovedClient) }
-  AccountManager.OnInvalidCredentials.on(dispatcher) { _ => onLoggedOut(LoggedOutEvent.InvalidCredentials) }
-  AccountManager.OnSelfDeleted.on(dispatcher) { _ => onLoggedOut(LoggedOutEvent.SelfDeleted) }
-
-  /**
-    * Register tracking event listeners on SE services in this method. We need a method here, since whenever the signal
-    * zms fires, we want to discard the previous reference to the subscriber. Not doing so will cause this class to keep
-    * reference to old instances of the services under zms (?)
-    */
-  private def registerTrackingEventListeners(zms: ZMessaging) = {
-
-    val convsUI = zms.convsUi
-    val push = zms.push
-
-    convsUI.assetUploadStarted.map(_.id) {
-      assetTrackingData(_).map {
-        case AssetTrackingData(convType, withOtto, exp, assetSize, m) =>
-          trackEvent(zms, ContributionEvent(fromMime(m), convType, exp, withOtto))
-      }
-    }
-
-    push.onMissedCloudPushNotifications.map(MissedPushEvent)(trackEvent(zms, _))
-    push.onFetchedPushNotifications(_.foreach(p => trackEvent(zms, ReceivedPushEvent(p))))
-  }
-
-  def trackEvent(zms: ZMessaging, event: TrackingEvent): Unit = trackEvent(event, Some(zms))
 
   /**
     * Sets super properties and actually performs the tracking of an event. Super properties are user scoped, so for that
     * reason, we need to ensure they're correctly set based on whatever account (zms) they were fired within.
     */
-  def trackEvent(event: TrackingEvent, zms: Option[ZMessaging] = None): Unit = {
+  private def process(event: TrackingEvent, zms: Option[ZMessaging] = None): Unit = {
     def send() = {
       for {
         sProps <- superProps.head
@@ -175,6 +136,13 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext, eventCo
             })
           }
         }
+      case ExceptionEvent(_, _, description, Some(throwable)) =>
+        trackingEnabled.map {
+          case true =>
+            HockeyApp.saveException(throwable, description)
+            send()
+          case _ => //no action
+        }
       case _ =>
         trackingEnabled.map {
           case true => send()
@@ -183,59 +151,31 @@ class GlobalTrackingController(implicit inj: Injector, cxt: WireContext, eventCo
     }
   }
 
-  private def assetTrackingData(id: AssetId): Future[AssetTrackingData] = {
-    for {
-      zms <- zMessaging.head
-      Some(msg) <- zms.messagesStorage.get(MessageId(id.str))
-      Some(conv) <- zms.convsContent.convById(msg.convId)
-      Some(asset) <- zms.assetsStorage.get(id)
-      convType <- convType(conv, zms.membersStorage)
-      isBot <- isBot(conv, zms.usersStorage)
-    } yield AssetTrackingData(convType, isBot, msg.ephemeral, asset.size, asset.mime)
-  }
-
-  def responseToErrorPair(response: Either[EntryError, Unit]) = response.fold({ e => Option((e.code, e.label))}, _ => Option.empty[(Int, String)])
+  private def responseToErrorPair(response: Either[EntryError, Unit]) = response.fold({ e => Option((e.code, e.label))}, _ => Option.empty[(Int, String)])
+  private def track(event: TrackingEvent) = ZMessaging.globalModule.map(_.trackingService.track(event))
 
   //Should wait until a ZMS instance exists before firing the event
   def onEnteredCredentials(response: Either[EntryError, Unit], method: SignInMethod): Unit = {
       for {
         acc <- ZMessaging.currentAccounts.activeAccount.head
         invToken = acc.flatMap(_.invitationToken)
-        zms <- ZMessaging.currentAccounts.activeZms.head
       } yield {
         //TODO when are generic tokens still used?
-        trackEvent(EnteredCredentialsEvent(method, responseToErrorPair(response), invToken), zms)
+        track(EnteredCredentialsEvent(method, responseToErrorPair(response), invToken))
       }
   }
 
-  def onLoggedOut(reason: String) = trackEvent(LoggedOutEvent(reason))
-
   def onEnterCode(response: Either[EntryError, Unit], method: SignInMethod): Unit =
-    ZMessaging.currentAccounts.activeZms.head.map{ zms => trackEvent(EnteredCodeEvent(method, responseToErrorPair(response)), zms) }
+    track(EnteredCodeEvent(method, responseToErrorPair(response)))
 
   def onRequestResendCode(response: Either[EntryError, Unit], method: SignInMethod, isCall: Boolean): Unit =
-    ZMessaging.currentAccounts.activeZms.head.map{ zms => trackEvent(ResendVerificationEvent(method, isCall, responseToErrorPair(response)), zms) }
+    track(ResendVerificationEvent(method, isCall, responseToErrorPair(response)))
 
   def onAddNameOnRegistration(response: Either[EntryError, Unit], inputType: InputType): Unit =
-    ZMessaging.currentAccounts.activeZms.head.map{ zms => trackEvent(EnteredNameOnRegistrationEvent(inputType, responseToErrorPair(response)), zms) }
+    track(EnteredNameOnRegistrationEvent(inputType, responseToErrorPair(response)))
 
   def onAddPhotoOnRegistration(inputType: InputType, source: Source, response: Either[EntryError, Unit] = Right(())): Unit =
-    ZMessaging.currentAccounts.activeZms.head.map{ zms => trackEvent(AddPhotoOnRegistrationEvent(inputType, responseToErrorPair(response), source), zms) }
-
-  def onSignUpScreen(method: SignInMethod): Unit = {
-    ZMessaging.currentAccounts.activeZms.head.map{ zms => trackEvent(SignUpScreenEvent(method), zms) }
-  }
-
-  def onOptOut(enabled: Boolean): Unit = zMessaging.head.map(zms => trackEvent(zms, OptEvent(enabled)))
-
-  //By default assigns events to the current zms (current account)
-  def onContributionEvent(action: ContributionEvent.Action): Unit =
-  for {
-    z <- zMessaging.head
-    conv <- currentConv.head
-    isBot <- isBot(conv, z.usersStorage)
-    convType <- convType(conv, z.membersStorage)
-  } trackEvent(z, ContributionEvent(action, convType, conv.ephemeral, isBot))
+    track(AddPhotoOnRegistrationEvent(inputType, responseToErrorPair(response), source))
 
   def flushEvents(): Unit = mixpanel.foreach(_.flush())
 }
