@@ -68,7 +68,7 @@ import com.waz.zclient.{BaseActivity, FragmentHelper, OnBackPressedListener, R}
 import com.waz.zclient.utils.ViewUtils
 
 import scala.collection.JavaConverters._
-import scala.concurrent. Future
+import scala.concurrent.Future
 
 object PickUserFragment {
   val TAG: String = classOf[PickUserFragment].getName

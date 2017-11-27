@@ -352,7 +352,8 @@ public class ParticipantHeaderFragment extends BaseFragment<ParticipantHeaderFra
 
         private void closeHeaderEditing() {
             headerEditText.clearFocus();
-            final int height = getView().getMeasuredHeight();
+            View view = getView();
+            final int height = (view != null)? view.getMeasuredHeight() : 0;
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {

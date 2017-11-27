@@ -20,7 +20,6 @@ package com.waz.zclient.ui.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -40,16 +39,7 @@ public class KeyboardUtils {
     }
 
     public static boolean keyboardIsVisible(View contentView) {
-        Rect r = new Rect();
-        contentView.getWindowVisibleDisplayFrame(r);
-        int screenHeight = contentView.getRootView().getHeight();
-        int keyboardHeight = screenHeight - r.bottom;
-        return keyboardHeight > 0;
-    }
-
-    public static void hideKeyboard(Context context, IBinder token) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(token, 0);
+        return getKeyboardHeight(contentView) > 0;
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -66,7 +56,6 @@ public class KeyboardUtils {
         return false;
     }
 
-
     private static InputMethodManager getInputMethodManager(Context context) {
         return (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
     }
@@ -74,7 +63,6 @@ public class KeyboardUtils {
     public static int getKeyboardHeight(View contentView) {
         Rect r = new Rect();
         contentView.getWindowVisibleDisplayFrame(r);
-        int screenHeight = contentView.getRootView().getHeight();
-        return screenHeight - r.bottom;
+        return contentView.getRootView().getHeight() - r.bottom;
     }
 }

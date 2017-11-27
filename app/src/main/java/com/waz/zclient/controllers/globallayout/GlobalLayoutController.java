@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import com.waz.zclient.controllers.navigation.Page;
 import com.waz.zclient.utils.ViewUtils;
 import com.waz.zclient.utils.keyboard.KeyboardVisibilityListener;
+import timber.log.Timber;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,6 +57,8 @@ public class GlobalLayoutController implements IGlobalLayoutController {
         globalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                Timber.i("onGlobalLayout");
+                globalLayout.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
                 keyboardListener.onLayoutChange();
             }
         };
@@ -68,6 +71,7 @@ public class GlobalLayoutController implements IGlobalLayoutController {
 
     @Override
     public void setGlobalLayout(View view) {
+        Timber.i("setGlobalLayout");
         if (globalLayout != null) {
             globalLayout.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
             keyboardListener.setCallback(null);
@@ -77,7 +81,6 @@ public class GlobalLayoutController implements IGlobalLayoutController {
         globalLayout.getViewTreeObserver().addOnGlobalLayoutListener(globalLayoutListener);
 
         // Listen to layout changes to determine when keyboard becomes visible / hidden
-        // this listener should be set after the global layout listener to avoid keyboard flickering
         keyboardListener = new KeyboardVisibilityListener(view);
         keyboardListener.setCallback(keyboardCallback);
     }

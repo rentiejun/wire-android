@@ -44,7 +44,6 @@ import android.view.animation.AnimationUtils;
 
 import java.lang.reflect.Field;
 
-
 public class ViewUtils {
 
     private static final int DEFAULT_CHILD_ANIMATION_DURATION = 350;
